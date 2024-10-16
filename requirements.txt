@@ -7,8 +7,8 @@ scikit-learn==1.5.2
 pysqlite3-binary
 streamlit-option-menu==0.3.2
 protobuf==3.20.3  # Ensure compatibility with other dependencies
-langchain==0.2.17  # Use a version compatible with langchain-community
-langchain-community==0.2.17  # Compatible with langchain 0.2.17
+langchain  # Use a version compatible with langchain-community
+langchain-community  # Compatible with langchain 0.2.17
 chromadb==0.4.3  # Ensure compatibility with langchain
 hnswlib==0.7.0
 chroma-hnswlib==0.7.1
