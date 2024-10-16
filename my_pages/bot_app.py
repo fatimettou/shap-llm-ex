@@ -10,7 +10,7 @@ from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
 import os
-import chromadb.config
+from chromadb.config import Settings
 
 # OpenAI API Key setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -34,18 +34,23 @@ def load_documents():
     )
     documents = text_splitter.split_documents(docs_list)
     return documents
-
 def create_vectorstore(documents, persist_directory=None):
     # Set up the OpenAI embeddings
     embeddings = OpenAIEmbeddings()
 
+    # Define settings for Chroma, using DuckDB for in-memory and Parquet for storage
+    client_settings = Settings(
+        chroma_db_impl="duckdb+parquet",  # Use DuckDB for storage
+        persist_directory=persist_directory  # Define persistence directory
+    )
+
     # Create the vectorstore using Chroma from documents
-    # Use persist_directory if provided, otherwise run in-memory
     vectorstore = Chroma.from_documents(
         documents=documents,
         collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=persist_directory  # Set to None for in-memory
+        persist_directory=persist_directory,  # Set to None for in-memory
+        client_settings=client_settings  # Pass the settings
     )
 
     return vectorstore
