@@ -34,7 +34,6 @@ def load_documents():
     documents = text_splitter.split_documents(docs_list)
     return documents
 
-# Create vector database and add documents
 def create_vectorstore(documents, persist_directory=None):
     embeddings = OpenAIEmbeddings()
     vectorstore = Chroma.from_documents(
@@ -44,7 +43,6 @@ def create_vectorstore(documents, persist_directory=None):
         persist_directory=persist_directory,  # Use this directory to persist data
     )
     return vectorstore
-
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
 def setup_chatbot(vectorstore):
     template = """
