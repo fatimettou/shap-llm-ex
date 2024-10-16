@@ -13,6 +13,9 @@ from langchain.document_loaders import TextLoader
 
 # OpenAI API Key setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("Please set the OPENAI_API_KEY environment variable")
+
 LANGCHAIN_PROJECT = "SHAP-LLM-Telco-Local-Explanations"
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
@@ -115,7 +118,7 @@ def chatbot_page():
         st.chat_message("user").markdown(f"**You:** {user_question}")
 
         # Retrieve context from vectorstore
-        retriever = vectorstore.as_retriever()
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})  # Limit to top 3 results
         context_docs = retriever.get_relevant_documents(user_question)
         context = "\n".join([doc.page_content for doc in context_docs])
 
