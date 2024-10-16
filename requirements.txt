@@ -11,3 +11,4 @@ protobuf==3.20.3
 langchain==0.3.3
 chromadb==0.3.22
 chroma-hnswlib==0.7.1
+hnswlib==0.7.1
