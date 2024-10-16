@@ -202,7 +202,6 @@ SQLAlchemy==2.0.35
 stack-data==0.6.2
 starlette==0.39.2
 streamlit==1.39.0
-streamlit-option-menu==0.4.0
 sympy==1.13.3
 tenacity==8.5.0
 terminado==0.15.1
@@ -236,3 +235,4 @@ wrapt==1.16.0
 xgboost==2.1.1
 yarl==1.9.2
 zipp==3.16.2
+streamlit-option-menu==0.4.0
