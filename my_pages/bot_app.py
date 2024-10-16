@@ -1,3 +1,6 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -7,8 +10,7 @@ from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
 import os
-from chromadb.config import Settings
-import chromadb
+
 # OpenAI API Key setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LANGCHAIN_PROJECT = "SHAP-LLM-Telco-Local-Explanations"
@@ -31,25 +33,18 @@ def load_documents():
     )
     documents = text_splitter.split_documents(docs_list)
     return documents
+
+# Create vector database and add documents
 def create_vectorstore(documents, persist_directory=None):
-    # Set up the OpenAI embeddings
     embeddings = OpenAIEmbeddings()
-
-    # Define the new settings for Chroma, removing deprecated config
-    client = chromadb.Client()
-
-    # Create the vectorstore using Chroma from documents
     vectorstore = Chroma.from_documents(
         documents=documents,
         collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=persist_directory,  # Set to None for in-memory
-        client=client  # Use the new client without deprecated settings
+        persist_directory=persist_directory,  # Use this directory to persist data
     )
-
     return vectorstore
 
-    return vectorstore
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
 def setup_chatbot(vectorstore):
     template = """
