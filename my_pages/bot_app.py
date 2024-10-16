@@ -38,13 +38,20 @@ def load_documents():
 def create_vectorstore(documents):
     embeddings = OpenAIEmbeddings()
     persist_directory = "chroma_persist"
+
+    # Remove the old persistence directory if it exists
+    if os.path.exists(persist_directory):
+        import shutil
+        shutil.rmtree(persist_directory)
+
     vectorstore = Chroma.from_documents(
         documents=documents,
-        collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=persist_directory,  # Use this directory to persist data
+        collection_name="churn-rag-chroma-1",
+        persist_directory=persist_directory,  # Use persistent directory
     )
     return vectorstore
+
 
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
 def setup_chatbot(vectorstore):
