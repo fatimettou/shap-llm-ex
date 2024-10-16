@@ -1,3 +1,6 @@
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -31,15 +34,15 @@ def load_documents():
     documents = text_splitter.split_documents(docs_list)
     return documents
 
-def create_vectorstore(documents, persist_directory=None):
+def create_vectorstore(documents):
     embeddings = OpenAIEmbeddings()
 
-    # In-memory vectorstore without persistence
+    # Utiliser Chroma en mémoire sans persistance
     vectorstore = Chroma.from_documents(
         documents=documents,
         collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=None  # Avoid persistence
+        persist_directory=None  # Mettre à None pour désactiver la persistance
     )
     return vectorstore
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
