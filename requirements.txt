@@ -10,6 +10,6 @@ protobuf==3.20.3
 chromadb==0.4.3
 hnswlib==0.7.0
 chroma-hnswlib==0.7.1
-langchain-community==0.2.16
-langchain-core==0.0.116
-langchain-openai==0.1.6
+langchain-community==0.2.15  # Try a stable version
+langchain-core==0.3.11  # Latest stable version
+langchain-openai==0.1.6  # Ensure it's compatible with core version
