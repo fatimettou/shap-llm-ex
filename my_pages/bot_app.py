@@ -14,9 +14,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 # OpenAI API Key setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    st.error("Please set the OPENAI_API_KEY environment variable in your environment.")
-    st.stop()
+
 
 LANGCHAIN_PROJECT = "SHAP-LLM-Telco-Local-Explanations"
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
