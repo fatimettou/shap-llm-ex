@@ -22,7 +22,7 @@ cached-property==1.5.2
 cachetools==5.3.0
 certifi==2023.7.22
 charset-normalizer==3.2.0
-chromadb==0.4.3
+chromadb
 chroma-hnswlib
 hnswlib
 click==8.1.7
