@@ -10,3 +10,4 @@ streamlit-option-menu==0.3.2
 protobuf==3.20.3
 hnswlib
 chromadb
+chroma-hnswlib
