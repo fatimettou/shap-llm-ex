@@ -2,6 +2,7 @@ __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import os
+import shutil
 import streamlit as st
 from langchain_community.vectorstores import Chroma  # Using langchain_community
 from langchain.embeddings.openai import OpenAIEmbeddings  # Ensure compatibility
@@ -14,7 +15,8 @@ from langchain.document_loaders import TextLoader
 # OpenAI API Key setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
-    raise ValueError("Please set the OPENAI_API_KEY environment variable")
+    st.error("Please set the OPENAI_API_KEY environment variable in your environment.")
+    st.stop()  # Stop execution if API key is not set
 
 LANGCHAIN_PROJECT = "SHAP-LLM-Telco-Local-Explanations"
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
@@ -43,15 +45,23 @@ def create_vectorstore(documents):
 
     # Remove the old persistence directory if it exists
     if os.path.exists(persist_directory):
-        import shutil
-        shutil.rmtree(persist_directory)
+        try:
+            shutil.rmtree(persist_directory)
+        except Exception as e:
+            st.error(f"Error removing old persistence directory: {e}")
+            st.stop()
 
-    vectorstore = Chroma.from_documents(
-        documents=documents,
-        embedding=embeddings,
-        collection_name="churn-rag-chroma-1",
-        persist_directory=persist_directory  # Use persistent directory
-    )
+    try:
+        vectorstore = Chroma.from_documents(
+            documents=documents,
+            embedding=embeddings,
+            collection_name="churn-rag-chroma-1",
+            persist_directory=persist_directory  # Use persistent directory
+        )
+    except Exception as e:
+        st.error(f"Error creating vectorstore: {e}")
+        st.stop()
+    
     return vectorstore
 
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
@@ -123,7 +133,11 @@ def chatbot_page():
         context = "\n".join([doc.page_content for doc in context_docs])
 
         # Generate chatbot response
-        response = chatbot_chain.run(context=context, question=user_question)
+        try:
+            response = chatbot_chain.run(context=context, question=user_question)
+        except Exception as e:
+            st.error(f"Error generating chatbot response: {e}")
+            st.stop()
 
         # Store the chatbot response in the chat history
         st.session_state["chat_history"].append({"role": "bot", "content": response})
