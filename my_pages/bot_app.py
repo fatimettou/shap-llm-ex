@@ -2,10 +2,9 @@ __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import os
-import shutil
 import streamlit as st
-from langchain_community.vectorstores import Chroma  # Using langchain_community
-from langchain.embeddings.openai import OpenAIEmbeddings  # Ensure compatibility
+from langchain_community.vectorstores import Chroma
+from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import LLMChain
@@ -16,7 +15,7 @@ from langchain.document_loaders import TextLoader
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     st.error("Please set the OPENAI_API_KEY environment variable in your environment.")
-    st.stop()  # Stop execution if API key is not set
+    st.stop()
 
 LANGCHAIN_PROJECT = "SHAP-LLM-Telco-Local-Explanations"
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
@@ -45,33 +44,27 @@ def create_vectorstore(documents):
 
     # Remove the old persistence directory if it exists
     if os.path.exists(persist_directory):
-        try:
-            shutil.rmtree(persist_directory)
-        except Exception as e:
-            st.error(f"Error removing old persistence directory: {e}")
-            st.stop()
+        import shutil
+        shutil.rmtree(persist_directory)
 
-    try:
-        vectorstore = Chroma.from_documents(
-            documents=documents,
-            embedding=embeddings,
-            collection_name="churn-rag-chroma-1",
-            persist_directory=persist_directory  # Use persistent directory
-        )
-    except Exception as e:
-        st.error(f"Error creating vectorstore: {e}")
-        st.stop()
-    
+    vectorstore = Chroma.from_documents(
+        documents=documents,
+        embedding=embeddings,
+        collection_name="churn-rag-chroma-1",
+        persist_directory=persist_directory  # Use persistent directory
+    )
     return vectorstore
 
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
 def setup_chatbot(vectorstore):
     template = """
-    You are an assistant to customer service agents. Answer the question based on the context below to help the agent.
+    You are an AI assistant helping with explainability of a machine learning model. 
+    Specifically, you are providing insights based on SHAP analysis. 
 
     Context: {context}
 
-    Question: {question}
+    Based on the SHAP analysis provided in the context above, please answer the following question: 
+    {question}
     """
     prompt = ChatPromptTemplate.from_template(template)
     model = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
