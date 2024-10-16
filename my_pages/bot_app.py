@@ -7,7 +7,7 @@ from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
 import os
-
+from chromadb.config import Settings
 # OpenAI API Key setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 LANGCHAIN_PROJECT = "SHAP-LLM-Telco-Local-Explanations"
@@ -33,15 +33,18 @@ def load_documents():
 
 # Create vector database and add documents
 def create_vectorstore(documents, persist_directory=None):
+    
     embeddings = OpenAIEmbeddings()
+
+    # Use in-memory ChromaDB to avoid SQLite limitations
     vectorstore = Chroma.from_documents(
         documents=documents,
         collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=persist_directory,  # Use this directory to persist data
+        persist_directory=None,  # Set to None to use in-memory storage
+        client_settings=Settings(chroma_db_impl="duckdb+parquet", persist_directory=None)
     )
     return vectorstore
-
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
 def setup_chatbot(vectorstore):
     template = """
