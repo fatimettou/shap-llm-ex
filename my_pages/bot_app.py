@@ -35,7 +35,7 @@ def load_documents():
     return documents
 
 
-def create_vectorstore(documents, persist_directory=None):
+def create_vectorstore(documents):
     embeddings = OpenAIEmbeddings()
 
     # Initialize Chroma directly without specifying chromadb.config.Settings
@@ -43,7 +43,7 @@ def create_vectorstore(documents, persist_directory=None):
         documents=documents,
         collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=persist_directory  # You can pass None to disable persistence
+        persist_directory="./chroma_persist"  # You can pass None to disable persistence
     )
     return vectorstore
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
@@ -69,7 +69,7 @@ def chatbot_page():
     
     # Create vectorstore (in-memory mode or persistent storage can be configured)
     persist_directory = "chroma_persist"  # Set this to None for in-memory mode
-    vectorstore = create_vectorstore(documents, persist_directory=persist_directory)
+    vectorstore = create_vectorstore(documents)
     
     # Set up the chatbot
     chatbot_chain = setup_chatbot(vectorstore)
