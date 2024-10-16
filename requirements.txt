@@ -11,4 +11,4 @@ langchain-community==0.3.2  # Ensure you're using the right version for the comm
 chromadb==0.4.3
 hnswlib==0.7.0
 chroma-hnswlib==0.7.1
-openai==1.51.0  # Add this for OpenAI embeddings support
+openai==0.27.2  # Add this for OpenAI embeddings support
