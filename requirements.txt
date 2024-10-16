@@ -219,6 +219,6 @@ websockets==13.1
 widgetsnbextension==4.0.13
 wrapt==1.16.0
 xgboost==2.1.1
-yarl==1.9.2
+yarl
 zipp==3.16.2
 streamlit-option-menu==0.3.2
