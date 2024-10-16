@@ -169,7 +169,7 @@ regex==2024.9.11
 requests==2.31.0
 requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
-rfc3339-validator==0.2.2
+rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
 rich==13.9.2
 rpds-py==0.11.1
@@ -222,4 +222,3 @@ xgboost==2.1.1
 yarl==1.9.2
 zipp==3.16.2
 streamlit-option-menu==0.3.2
-
