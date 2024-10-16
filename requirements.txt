@@ -6,9 +6,9 @@ numpy==1.26.4
 scikit-learn==1.5.2
 pysqlite3-binary
 streamlit-option-menu==0.3.2
-protobuf==3.20.3  # Ensure compatibility with older protobuf
-langchain==0.0.116  # A version that works well with `langchain-community`
-langchain-community==0.2.17  # Ensure compatibility with the chosen langchain version
-chromadb==0.4.3  # No specific version here since ChromaDB evolves, but >=0.4.0 is preferred for stability
+protobuf==3.20.3  # Ensure compatibility with other dependencies
+langchain==0.2.17  # Use a version compatible with langchain-community
+langchain-community==0.2.17  # Compatible with langchain 0.2.17
+chromadb==0.4.3  # Ensure compatibility with langchain
 hnswlib==0.7.0
 chroma-hnswlib==0.7.1
