@@ -3,7 +3,7 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 from langchain_community.vectorstores import Chroma  # Using langchain_community
-from langchain_community.embeddings import OpenAIEmbeddings  # Ensure compatibility
+from langchain.embeddings.openai import OpenAIEmbeddings  # Ensure compatibility
 from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import LLMChain
@@ -51,7 +51,7 @@ def create_vectorstore(documents):
         documents=documents,
         embedding=embeddings,
         collection_name="churn-rag-chroma-1",
-        persist_directory=persist_directory  # Use persistent directory
+        persist_directory=persist_directory,  # Use persistent directory
     )
     return vectorstore
 
@@ -76,7 +76,8 @@ def chatbot_page():
     # Load and process documents
     documents = load_documents()
 
-    # Create vectorstore (persistence enabled with directory)
+    # Create vectorstore (in-memory mode or persistent storage can be configured)
+    persist_directory = "chroma_persist"  # Set this to None for in-memory mode
     vectorstore = create_vectorstore(documents)
 
     # Set up the chatbot
