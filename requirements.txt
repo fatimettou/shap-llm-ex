@@ -144,7 +144,7 @@ propcache==0.2.0
 protobuf==4.25.5
 psutil==5.9.5
 ptyprocess==0.7.0
-pure_eval==0.3.0
+pure_eval==0.2.3
 pyarrow==17.0.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
