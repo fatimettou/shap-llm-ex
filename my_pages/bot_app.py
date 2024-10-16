@@ -2,8 +2,8 @@ __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
-from langchain.vectorstores import Chroma
-from langchain.embeddings.openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma  # Using langchain_community
+from langchain_community.embeddings import OpenAIEmbeddings  # Ensure compatibility
 from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import LLMChain
@@ -13,10 +13,13 @@ import os
 
 # OpenAI API Key setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("Please set the OPENAI_API_KEY environment variable")
+
 LANGCHAIN_PROJECT = "SHAP-LLM-Telco-Local-Explanations"
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
-# Define the paths to the text files generated during SHAP analysis
+# Function to load documents
 def load_documents():
     text_files = [
         "documents/data_dictionary.txt",
@@ -26,8 +29,8 @@ def load_documents():
     ]
     docs = [TextLoader(url).load() for url in text_files]
     docs_list = [item for sublist in docs for item in sublist]
-    
-    # Split documents into smaller chunks using text splitter
+
+    # Split documents into smaller chunks
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=500, chunk_overlap=50
     )
@@ -48,10 +51,9 @@ def create_vectorstore(documents):
         documents=documents,
         embedding=embeddings,
         collection_name="churn-rag-chroma-1",
-        persist_directory=persist_directory,  # Use persistent directory
+        persist_directory=persist_directory  # Use persistent directory
     )
     return vectorstore
-
 
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
 def setup_chatbot(vectorstore):
@@ -70,14 +72,13 @@ def setup_chatbot(vectorstore):
 # Chatbot page with suggested questions
 def chatbot_page():
     st.title("Chat with Your Model Based on SHAP Explanations")
-    
+
     # Load and process documents
     documents = load_documents()
-    
-    # Create vectorstore (in-memory mode or persistent storage can be configured)
-    persist_directory = "chroma_persist"  # Set this to None for in-memory mode
+
+    # Create vectorstore (persistence enabled with directory)
     vectorstore = create_vectorstore(documents)
-    
+
     # Set up the chatbot
     chatbot_chain = setup_chatbot(vectorstore)
 
@@ -124,7 +125,7 @@ def chatbot_page():
 
         # Generate chatbot response
         response = chatbot_chain.run(context=context, question=user_question)
-        
+
         # Store the chatbot response in the chat history
         st.session_state["chat_history"].append({"role": "bot", "content": response})
         st.chat_message("bot").markdown(f"**Chatbot:** {response}")
