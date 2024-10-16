@@ -3,8 +3,8 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import os
 import streamlit as st
-from langchain_community.vectorstores import Chroma  # Changed to langchain_community
-from langchain.embeddings import OpenAIEmbeddings  # Ensure compatibility
+from langchain_community.vectorstores import Chroma  # Using langchain_community
+from langchain.embeddings.openai import OpenAIEmbeddings  # Ensure compatibility
 from langchain.prompts import ChatPromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import LLMChain
