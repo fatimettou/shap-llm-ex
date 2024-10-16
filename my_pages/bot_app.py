@@ -36,13 +36,18 @@ def create_vectorstore(documents, persist_directory=None):
     
     embeddings = OpenAIEmbeddings()
 
-    # Use in-memory ChromaDB to avoid SQLite limitations
+    # Define the in-memory settings for Chroma using DuckDB
+    client_settings = Settings(
+        chroma_db_impl="duckdb+parquet",  # Use DuckDB for in-memory mode
+        persist_directory=None  # Ensure no persistence to avoid SQLite
+    )
+
+    # Create vectorstore with Chroma
     vectorstore = Chroma.from_documents(
         documents=documents,
         collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=None,  # Set to None to use in-memory storage
-        client_settings=Settings(chroma_db_impl="duckdb+parquet", persist_directory=None)
+        client_settings=client_settings  # Pass the in-memory settings
     )
     return vectorstore
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
