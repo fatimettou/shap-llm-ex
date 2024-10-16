@@ -11,5 +11,4 @@ chromadb==0.4.3
 hnswlib==0.7.0
 chroma-hnswlib==0.7.1
 langchain-community==0.2.15
-langchain-core==0.1.12  # Adjust this to a compatible version with langchain_openai
 langchain-openai==0.1.5  # Use a compatible version with langchain_core
