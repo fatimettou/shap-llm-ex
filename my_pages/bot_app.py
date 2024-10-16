@@ -37,14 +37,15 @@ def load_documents():
 # Create vector database and add documents
 def create_vectorstore(documents, persist_directory=None):
     embeddings = OpenAIEmbeddings()
+
+    # Create the vectorstore in memory, without persistence
     vectorstore = Chroma.from_documents(
         documents=documents,
         collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=persist_directory,  # Use this directory to persist data
+        persist_directory=None,  # Set to None for in-memory storage
     )
     return vectorstore
-
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
 def setup_chatbot(vectorstore):
     template = """
