@@ -63,6 +63,8 @@ def setup_chatbot(vectorstore):
     Context: {context}
 
     Question: {question}
+
+    If the context contains details about SHAP analysis or important features, provide the SHAP values and rank the most important features as per the SHAP analysis.
     """
     prompt = ChatPromptTemplate.from_template(template)
     model = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
@@ -120,7 +122,7 @@ def chatbot_page():
         st.chat_message("user").markdown(f"**You:** {user_question}")
 
         # Retrieve context from vectorstore
-        retriever = vectorstore.as_retriever()
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})  # Limit to top 3 results
         context_docs = retriever.get_relevant_documents(user_question)
         context = "\n".join([doc.page_content for doc in context_docs])
 
