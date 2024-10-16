@@ -80,7 +80,7 @@ jsonpatch==1.33
 jsonpointer==2.0
 jsonschema==4.19.0
 jsonschema-specifications==2023.3.6
-langchain==0.3.10
+langchain==0.3.3
 langchain-community==0.3.2
 langchain-core==0.3.10
 langchain-openai==0.2.2
