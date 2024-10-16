@@ -190,7 +190,7 @@ starlette==0.39.2
 streamlit==1.39.0
 sympy==1.13.3
 tenacity==8.5.0
-terminado==0.15.1
+terminado==0.18.1
 threadpoolctl==3.5.0
 tiktoken==0.8.0
 tinycss2==1.2.1
