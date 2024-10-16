@@ -3,13 +3,14 @@ import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import os
 import streamlit as st
-from langchain_community.vectorstores import Chroma
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.prompts import ChatPromptTemplate
+from langchain_community.vectorstores import Chroma, DocArrayInMemorySearch
+from langchain_core.runnables import RunnableParallel, RunnablePassthrough
+from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chains import LLMChain
-from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import TextLoader
+from langchain.prompts import ChatPromptTemplate
+from langchain_openai.chat_models import ChatOpenAI
+from langchain_openai.embeddings import OpenAIEmbeddings
+from langchain_core.output_parsers import StrOutputParser
 
 # OpenAI API Key setup
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -20,7 +21,7 @@ if not OPENAI_API_KEY:
 LANGCHAIN_PROJECT = "SHAP-LLM-Telco-Local-Explanations"
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
-# Function to load documents
+# Function to load and split documents
 def load_documents():
     text_files = [
         "documents/data_dictionary.txt",
@@ -28,47 +29,61 @@ def load_documents():
         "documents/shap_summary.txt",
         "documents/shap_explanation.txt"
     ]
-    docs = [TextLoader(url).load() for url in text_files]
+    
+    docs = [TextLoader(file).load() for file in text_files]
     docs_list = [item for sublist in docs for item in sublist]
 
-    # Split documents into smaller chunks
     text_splitter = RecursiveCharacterTextSplitter.from_tiktoken_encoder(
         chunk_size=500, chunk_overlap=50
     )
     documents = text_splitter.split_documents(docs_list)
     return documents
 
+# Create vectorstore and embeddings
 def create_vectorstore(documents):
     embeddings = OpenAIEmbeddings()
     persist_directory = "chroma_persist"
 
-    # Remove the old persistence directory if it exists
+    # Clear the old persistence directory if it exists
     if os.path.exists(persist_directory):
         import shutil
         shutil.rmtree(persist_directory)
 
+    # Use Chroma or DocArrayInMemorySearch for storing documents
     vectorstore = Chroma.from_documents(
         documents=documents,
         embedding=embeddings,
         collection_name="churn-rag-chroma-1",
-        persist_directory=persist_directory  # Use persistent directory
+        persist_directory=persist_directory  # Persistent storage
     )
+
+    # Alternatively, you can use DocArrayInMemorySearch
+    # vectorstore = DocArrayInMemorySearch.from_documents(documents, embeddings)
+
     return vectorstore
 
-# Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
+# Set up the chatbot using LangChain's Runnable interface
 def setup_chatbot(vectorstore):
     template = """
-    You are an AI assistant helping with explainability of a machine learning model. 
-    Specifically, you are providing insights based on SHAP analysis. 
+    You are an assistant to customer service agents. Answer the question based on the context below to help the agent.
 
     Context: {context}
 
-    Based on the SHAP analysis provided in the context above, please answer the following question: 
-    {question}
+    Question: {question}
     """
+    
+    # Create the prompt
     prompt = ChatPromptTemplate.from_template(template)
     model = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
-    chain = LLMChain(llm=model, prompt=prompt)
+
+    # Define the runnable chain
+    chain = (
+        {"context": vectorstore.as_retriever(), "question": RunnablePassthrough()}
+        | prompt
+        | model
+        | StrOutputParser()
+    )
+    
     return chain
 
 # Chatbot page with suggested questions
@@ -120,14 +135,14 @@ def chatbot_page():
         st.session_state["chat_history"].append({"role": "user", "content": user_question})
         st.chat_message("user").markdown(f"**You:** {user_question}")
 
-        # Retrieve context from vectorstore
-        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})  # Limit to top 3 results
+        # Retrieve context from vectorstore using retriever
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})  # Retrieve top 3 results
         context_docs = retriever.get_relevant_documents(user_question)
         context = "\n".join([doc.page_content for doc in context_docs])
 
         # Generate chatbot response
         try:
-            response = chatbot_chain.run(context=context, question=user_question)
+            response = chatbot_chain.invoke({"context": context, "question": user_question})
         except Exception as e:
             st.error(f"Error generating chatbot response: {e}")
             st.stop()
