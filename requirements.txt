@@ -42,7 +42,7 @@ durationpy==0.9
 entrypoints==0.4
 exceptiongroup==1.1.2
 executing==1.2.0
-fastapi==0.115.2
+fastapi
 fastjsonschema==2.18.0
 filelock==3.16.1
 flatbuffers==24.3.25
