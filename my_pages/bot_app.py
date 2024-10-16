@@ -34,12 +34,15 @@ def load_documents():
     documents = text_splitter.split_documents(docs_list)
     return documents
 
-# Function to create the vector store using Chroma
 def create_vectorstore(documents):
     embeddings = OpenAIEmbeddings()
     persist_directory = "chroma_persist"
 
-    # Initialize Chroma from langchain_community
+    # Remove the old persistence directory if it exists
+    if os.path.exists(persist_directory):
+        import shutil
+        shutil.rmtree(persist_directory)
+
     vectorstore = Chroma.from_documents(
         documents=documents,
         embedding=embeddings,
