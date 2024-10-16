@@ -4,9 +4,9 @@ pandas==2.2.3
 xgboost==2.1.1
 numpy==1.26.4
 scikit-learn==1.5.2
-chromadb==0.3.22
 pysqlite3-binary
 langchain==0.3.3  # Minimal version needed for your chatbot
 streamlit-option-menu==0.3.2
 protobuf==3.20.3
 hnswlib
+chromadb
