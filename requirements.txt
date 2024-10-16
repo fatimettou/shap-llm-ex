@@ -196,7 +196,7 @@ tiktoken==0.8.0
 tinycss2==1.2.1
 tokenizers==0.20.1
 toml==0.10.2
-tomli==2.1.0
+tomli==2.0.2
 tornado==6.3.3
 tqdm==4.66.5
 traitlets==5.9.0
