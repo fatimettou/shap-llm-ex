@@ -7,9 +7,12 @@ scikit-learn==1.5.2
 pysqlite3-binary
 streamlit-option-menu==0.3.2
 protobuf==3.20.3
-langchain-community==0.2.7 # Ensure compatibility with pydantic<2.0
-chromadb==0.4.3  # Requires pydantic<2.0
+ # Requires pydantic<2.0
 hnswlib==0.7.0
 chroma-hnswlib==0.7.1
 fastapi==0.95.2  # Works with pydantic<2.0
 openai==0.27.0  # Ensure this version also uses pydantic<2.0
+
+langchain-community>=0.2.7,<0.3
+chromadb>=0.4.2,<0.5
+fastapi>=0.95.2,<1.0
