@@ -34,15 +34,16 @@ def load_documents():
     documents = text_splitter.split_documents(docs_list)
     return documents
 
-def create_vectorstore(documents):
+
+def create_vectorstore(documents, persist_directory=None):
     embeddings = OpenAIEmbeddings()
 
-    # Utiliser Chroma en mémoire sans persistance
+    # Utiliser Chroma avec ou sans persistance
     vectorstore = Chroma.from_documents(
         documents=documents,
         collection_name="churn-rag-chroma-1",
         embedding=embeddings,
-        persist_directory=None  # Mettre à None pour désactiver la persistance
+        persist_directory=persist_directory  # Vous pouvez passer None pour désactiver la persistance
     )
     return vectorstore
 # Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
