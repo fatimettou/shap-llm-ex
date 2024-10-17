@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import xgboost as xgb
 
+# Update the function to accept df and correct_order as arguments
 def predictions_page(model):
     st.title("Make Predictions")
 
@@ -9,7 +10,11 @@ def predictions_page(model):
 
     # Use columns to organize input features
     col1, col2, col3 = st.columns(3)
-
+    correct_order = ['gender', 'seniorcitizen', 'partner', 'dependents', 'phoneservice',
+                 'multiplelines', 'internetservice', 'onlinesecurity', 'onlinebackup',
+                 'deviceprotection', 'techsupport', 'streamingtv', 'streamingmovies',
+                 'contract', 'paperlessbilling', 'paymentmethod', 'tenure',
+                 'monthlycharges', 'totalcharges']
     with col1:
         gender = st.selectbox("Gender", options=["Male", "Female"])
         seniorcitizen = st.selectbox("Senior Citizen", options=[0, 1])
@@ -71,6 +76,9 @@ def predictions_page(model):
 
         # Convert input data into DataFrame format
         input_df = pd.DataFrame([input_data])
+
+        # Ensure the column order matches the correct_order
+        input_df = input_df[correct_order]
 
         # Convert categorical columns to 'category' dtype
         categorical_columns = input_df.select_dtypes(include=['object']).columns
