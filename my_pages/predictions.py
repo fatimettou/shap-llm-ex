@@ -1,54 +1,92 @@
 import streamlit as st
-import xgboost as xgb
 import pandas as pd
+import xgboost as xgb
 
-def predictions_page(model, df, correct_order):
-    if model is None:
-        st.warning("Please upload a model.")
-        return
+def predictions_page(model):
+    st.title("Make Predictions")
 
-    if df is None:
-        st.warning("Please upload a dataset.")
-        return
+    st.subheader("Enter the features for the prediction:")
 
-    # Convert object columns to categorical types
-    categorical_columns = df.select_dtypes(include=['object']).columns
-    for col in categorical_columns:
-        df[col] = df[col].astype('category')
+    # Use columns to organize input features
+    col1, col2, col3 = st.columns(3)
 
-    # Let the user select the target column for prediction
-    target_col = st.selectbox("Select the target column for prediction", df.columns)
+    with col1:
+        gender = st.selectbox("Gender", options=["Male", "Female"])
+        seniorcitizen = st.selectbox("Senior Citizen", options=[0, 1])
+        partner = st.selectbox("Partner", options=["Yes", "No"])
+        dependents = st.selectbox("Dependents", options=["Yes", "No"])
+        phoneservice = st.selectbox("Phone Service", options=["Yes", "No"])
 
+    with col2:
+        multiplelines = st.selectbox("Multiple Lines", options=["Yes", "No", "No phone service"])
+        internetservice = st.selectbox("Internet Service", options=["DSL", "Fiber optic", "No"])
+        onlinesecurity = st.selectbox("Online Security", options=["Yes", "No", "No internet service"])
+        onlinebackup = st.selectbox("Online Backup", options=["Yes", "No", "No internet service"])
+        deviceprotection = st.selectbox("Device Protection", options=["Yes", "No", "No internet service"])
+
+    with col3:
+        techsupport = st.selectbox("Tech Support", options=["Yes", "No", "No internet service"])
+        streamingtv = st.selectbox("Streaming TV", options=["Yes", "No", "No internet service"])
+        streamingmovies = st.selectbox("Streaming Movies", options=["Yes", "No", "No internet service"])
+        contract = st.selectbox("Contract", options=["Month-to-month", "One year", "Two year"])
+        paperlessbilling = st.selectbox("Paperless Billing", options=["Yes", "No"])
+        paymentmethod = st.selectbox("Payment Method", options=[
+            "Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"
+        ])
+
+    # Additional inputs for numerical fields
+    col1, col2 = st.columns(2)
+
+    with col1:
+        tenure = st.slider("Tenure", 0, 72, 12)
+        monthlycharges = st.slider("Monthly Charges", 0.0, 120.0, 50.0)
+
+    with col2:
+        totalcharges = st.slider("Total Charges", 0.0, 9000.0, 1000.0)
+
+    # Once user inputs are ready, make predictions
     if st.button("Run Predictions"):
-        X = df.drop(columns=[target_col, 'customerid'], errors='ignore')
-        y = df[target_col]
+        # Prepare data for prediction
+        input_data = {
+            'gender': gender,
+            'seniorcitizen': seniorcitizen,
+            'partner': partner,
+            'dependents': dependents,
+            'phoneservice': phoneservice,
+            'multiplelines': multiplelines,
+            'internetservice': internetservice,
+            'onlinesecurity': onlinesecurity,
+            'onlinebackup': onlinebackup,
+            'deviceprotection': deviceprotection,
+            'techsupport': techsupport,
+            'streamingtv': streamingtv,
+            'streamingmovies': streamingmovies,
+            'contract': contract,
+            'paperlessbilling': paperlessbilling,
+            'paymentmethod': paymentmethod,
+            'tenure': tenure,
+            'monthlycharges': monthlycharges,
+            'totalcharges': totalcharges
+        }
 
-        # Ensure columns are in the correct order
-        missing_columns = set(correct_order) - set(X.columns)
-        if missing_columns:
-            st.error(f"Missing columns for prediction: {missing_columns}")
-            return
+        # Convert input data into DataFrame format
+        input_df = pd.DataFrame([input_data])
 
-        # Reorder the dataset to match the correct column order (used in training)
-        X = X[correct_order]
+        # Convert categorical columns to 'category' dtype
+        categorical_columns = input_df.select_dtypes(include=['object']).columns
+        input_df[categorical_columns] = input_df[categorical_columns].astype('category')
 
-        # Prepare DMatrix for XGBoost
-        dmatrix = xgb.DMatrix(X, enable_categorical=True)
+        # Ensure the use of enable_categorical=True in DMatrix
+        dmatrix = xgb.DMatrix(input_df, enable_categorical=True)
+        
+        # Make prediction
+        prediction_proba = model.predict(dmatrix)
 
-        # Generate predictions
-        st.write("Running predictions...")
-        predictions = model.predict(dmatrix)
+        # Apply threshold to convert probabilities to 0 or 1
+        prediction = (prediction_proba > 0.5).astype(int)
 
-        # If binary classification, apply a threshold for Yes/No or 1/0 classification
-        threshold = 0.5
-        predicted_classes = (predictions > threshold).astype(int)
-        predicted_labels = ["Yes" if pred == 1 else "No" for pred in predicted_classes]
+        # Display prediction result as Yes/No
+        prediction_label = "Yes" if prediction[0] == 1 else "No"
 
-        # Display predictions in a table
-        result_df = X.copy()
-        result_df["Actual"] = y
-        result_df["Predicted Probability"] = predictions
-        result_df["Predicted Class"] = predicted_labels
-        st.write(result_df)
-
-        st.success("Predictions complete!")
+        st.write("Prediction Result:")
+        st.write(f"Churn: {prediction_label}")

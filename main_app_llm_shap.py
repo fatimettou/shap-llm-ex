@@ -102,7 +102,7 @@ elif selected == "Predictions":
     elif st.session_state.df is None:
         st.warning("Please upload the dataset first.")
     else:
-        predictions_page(st.session_state.model, st.session_state.df)
+        predictions_page(st.session_state.model)
 
 elif selected == "Chatbot":
     chatbot_page()
