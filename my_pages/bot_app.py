@@ -1,6 +1,7 @@
 __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import streamlit as st
 from langchain_community.vectorstores import Chroma  # Using langchain_community
 from langchain.embeddings.openai import OpenAIEmbeddings  # Ensure compatibility
@@ -9,6 +10,8 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.document_loaders import TextLoader
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 import os
 
 # OpenAI API Key setup
@@ -42,11 +45,6 @@ def create_vectorstore(documents):
     embeddings = OpenAIEmbeddings()
     persist_directory = "chroma_persist"
 
-    # Remove the old persistence directory if it exists (for fresh testing)
-    if os.path.exists(persist_directory):
-        import shutil
-        shutil.rmtree(persist_directory)
-
     try:
         vectorstore = Chroma.from_documents(
             documents=documents,
@@ -59,7 +57,6 @@ def create_vectorstore(documents):
         vectorstore = None
     return vectorstore
 
-# Set up the chatbot using OpenAI chat model (like GPT-3.5-turbo)
 def setup_chatbot(vectorstore):
     template = """
     You are an assistant to customer service agents. Answer the question based on the context below to help the agent.
@@ -67,12 +64,18 @@ def setup_chatbot(vectorstore):
     Context: {context}
 
     Question: {question}
-
-    If the context contains details about SHAP analysis or important features, provide the SHAP values and rank the most important features as per the SHAP analysis.
     """
     prompt = ChatPromptTemplate.from_template(template)
     model = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
-    chain = LLMChain(llm=model, prompt=prompt)
+
+    # Setting up the chain with the correct runnables
+    chain = (
+        {"context": vectorstore.as_retriever(), "question": RunnablePassthrough()}
+        | prompt
+        | model
+        | StrOutputParser()
+    )
+
     return chain
 
 def chatbot_page():
