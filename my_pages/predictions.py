@@ -44,7 +44,7 @@ def predictions_page(model):
 
     with col1:
         tenure = st.slider("Tenure", 0, 72, 12)
-        monthlycharges = st.slider("Monthly Charges", 0.0, 120.0, 50.0)
+        monthlycharges = st.slider("Monthly Charges", 0.0, 200.0, 50.0)
 
     with col2:
         totalcharges = st.slider("Total Charges", 0.0, 9000.0, 1000.0)
