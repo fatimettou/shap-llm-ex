@@ -8,6 +8,7 @@ from my_pages.generate_shap import generate_shap_page
 from my_pages.predictions import predictions_page
 from my_pages.bot_app import chatbot_page
 
+
 # Set up the color scheme using the colors from the Sorbonne logo
 st.markdown(
     """
@@ -64,18 +65,44 @@ with st.sidebar:
         },
     )
 
+# Global variables to store model and dataset
+if "model" not in st.session_state:
+    st.session_state.model = None
+
+if "df" not in st.session_state:
+    st.session_state.df = None
+
 # Main Content Based on Selected Page
 if selected == "Upload Model":
-    upload_model_page()
+    model = upload_model_page()
+    if model:
+        st.session_state.model = model
+        st.success("Model is successfully loaded.")
 
 elif selected == "Upload Dataset":
-    upload_dataset_page()
+    if st.session_state.model is None:
+        st.warning("Please upload the model first.")
+    else:
+        df = upload_dataset_page()
+        if df is not None:
+            st.session_state.df = df
+            st.success("Dataset uploaded successfully.")
 
 elif selected == "Generate SHAP":
-    generate_shap_page()
+    if st.session_state.model is None:
+        st.warning("Please upload the model first.")
+    elif st.session_state.df is None:
+        st.warning("Please upload the dataset first.")
+    else:
+        generate_shap_page(st.session_state.model, st.session_state.df)
 
 elif selected == "Predictions":
-    predictions_page()
+    if st.session_state.model is None:
+        st.warning("Please upload the model first.")
+    elif st.session_state.df is None:
+        st.warning("Please upload the dataset first.")
+    else:
+        predictions_page(st.session_state.model, st.session_state.df)
 
 elif selected == "Chatbot":
     chatbot_page()
