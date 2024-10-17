@@ -75,16 +75,20 @@ def setup_chatbot(vectorstore):
     chain = LLMChain(llm=model, prompt=prompt)
     return chain
 
-# Chatbot page with suggested questions
 def chatbot_page():
     st.title("Chat with Your Model Based on SHAP Explanations")
-
+    
     # Load and process documents
     documents = load_documents()
+    if not documents:
+        st.error("Failed to load documents.")
+        return
 
     # Create vectorstore (in-memory mode or persistent storage can be configured)
-    persist_directory = "chroma_persist"  # Set this to None for in-memory mode
     vectorstore = create_vectorstore(documents)
+    if not vectorstore:
+        st.error("Failed to create vectorstore.")
+        return
 
     # Set up the chatbot
     chatbot_chain = setup_chatbot(vectorstore)
@@ -102,7 +106,7 @@ def chatbot_page():
 
     # Input area for user questions
     user_question = st.chat_input("Ask a question about the SHAP analysis or the data:")
-
+    
     # Add suggested questions in a grid-like format
     st.write("### Suggested Questions:")
     cols = st.columns(4)
@@ -118,24 +122,33 @@ def chatbot_page():
     with cols[3]:
         if st.button("What is the global importance of each feature?"):
             user_question = "What is the global importance of each feature?"
-
-    # If the user provides a question
+    print(user_question)
+    # Inside chatbot_page function
     if user_question:
         # Store the user input in the chat history
         st.session_state["chat_history"].append({"role": "user", "content": user_question})
         st.chat_message("user").markdown(f"**You:** {user_question}")
 
-        # Retrieve context from vectorstore
-        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})  # Limit to top 3 results
-        context_docs = retriever.get_relevant_documents(user_question)
-        context = "\n".join([doc.page_content for doc in context_docs])
+        # # Retrieve context from vectorstore
+        # retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 
-        # Generate chatbot response
-        response = chatbot_chain.run(context=context, question=user_question)
+        # # Ensure user_question is passed as a string
+        # context_docs = retriever.invoke(user_question)  # user_question should be a string
 
+        # # Format the retrieved context for the chatbot chain
+        # context = "\n".join([doc.page_content for doc in context_docs])
+
+        # Generate chatbot response, ensuring the question and context are strings
+        response = chatbot_chain.invoke(
+        user_question
+         # The user's question as a string
+        )
+#  chatbot_chain.invoke("""What are the most important features in the model?
+#              """) 
         # Store the chatbot response in the chat history
         st.session_state["chat_history"].append({"role": "bot", "content": response})
         st.chat_message("bot").markdown(f"**Chatbot:** {response}")
+
 
 # Run the Streamlit page
 if __name__ == "__main__":
