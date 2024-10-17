@@ -146,7 +146,7 @@ def chatbot_page():
         # user_question
         #  # The user's question as a string
         # )
-        response = chatbot_chain.invoke({"question": user_question})
+        response = chatbot_chain.invoke(user_question)
 #  chatbot_chain.invoke("""What are the most important features in the model?
 #              """) 
         # Store the chatbot response in the chat history
