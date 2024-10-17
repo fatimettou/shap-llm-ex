@@ -57,26 +57,6 @@ def create_vectorstore(documents):
         vectorstore = None
     return vectorstore
 
-# def setup_chatbot(vectorstore):
-#     template = """
-#     You are an assistant to customer service agents. Answer the question based on the context below to help the agent.
-
-#     Context: {context}
-
-#     Question: {question}
-#     """
-#     prompt = ChatPromptTemplate.from_template(template)
-#     model = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
-
-#     # Setting up the chain with the correct runnables
-#     chain = (
-#         {"context": vectorstore.as_retriever(), "question": RunnablePassthrough()}
-#         | prompt
-#         | model
-#         | StrOutputParser()
-#     )
-
-#     return chain
 def setup_chatbot(vectorstore):
     template = """
     You are an assistant to customer service agents. Answer the question based on the context below to help the agent.
@@ -88,17 +68,9 @@ def setup_chatbot(vectorstore):
     prompt = ChatPromptTemplate.from_template(template)
     model = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
 
-    # Handling missing context: Add logic to handle cases where no documents are retrieved
-    def get_relevant_context(question):
-        retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
-        context_docs = retriever.get_relevant_documents(question)
-        if not context_docs:
-            return ""  # If no context is found, return an empty string
-        return "\n".join([doc.page_content for doc in context_docs])  # Format the context
-
     # Setting up the chain with the correct runnables
     chain = (
-        {"context": get_relevant_context, "question": RunnablePassthrough()}
+        {"context": vectorstore.as_retriever(), "question": RunnablePassthrough()}
         | prompt
         | model
         | StrOutputParser()
