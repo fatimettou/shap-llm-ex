@@ -13,3 +13,4 @@ chromadb==0.4.3  # Ensure compatibility with langchain
 hnswlib==0.7.0
 chroma-hnswlib==0.7.1
 langchain-openai==0.1.6
+matplotlib==3.9.2
